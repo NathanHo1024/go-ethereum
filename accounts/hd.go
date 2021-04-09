@@ -28,21 +28,27 @@ import (
 // DefaultRootDerivationPath is the root path to which custom derivation endpoints
 // are appended. As such, the first account will be at m/44'/60'/0'/0, the second
 // at m/44'/60'/0'/1, etc.
+// DefaultRootDerivationPath 是自定义派生终结点附加到的根路径。
+// 这样，第一个帐户将为m / 44'/ 60'/ 0'/ 0，第二个帐户将为m / 44'/ 60'/ 0'/ 1，依此类推。
 var DefaultRootDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0}
 
 // DefaultBaseDerivationPath is the base path from which custom derivation endpoints
 // are incremented. As such, the first account will be at m/44'/60'/0'/0/0, the second
 // at m/44'/60'/0'/0/1, etc.
+// DefaultBaseDerivationPath 是自定义派生终结点从其递增的基本路径。
+// 这样，第一个帐户将为m / 44'/ 60'/ 0'/ 0/0，第二个帐户将为m / 44'/ 60'/ 0'/ 0/1，依此类推。
 var DefaultBaseDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0}
 
 // LegacyLedgerBaseDerivationPath is the legacy base path from which custom derivation
 // endpoints are incremented. As such, the first account will be at m/44'/60'/0'/0, the
 // second at m/44'/60'/0'/1, etc.
+// LegacyLedgerBaseDerivationPath 是从中递增自定义派生终结点的旧版基本路径。
+// 这样，第一个帐户将为m / 44'/ 60'/ 0'/ 0，第二个帐户将为m / 44'/ 60'/ 0'/ 1，依此类推。
 var LegacyLedgerBaseDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0}
 
 // DerivationPath represents the computer friendly version of a hierarchical
 // deterministic wallet account derivaion path.
-//
+// DerivationPath 表示分层确定性钱包帐户派生路径的计算机友好版本。
 // The BIP-32 spec https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
 // defines derivation paths to be of the form:
 //
@@ -57,61 +63,71 @@ var LegacyLedgerBaseDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000 
 // from https://github.com/ethereum/EIPs/issues/84, albeit it's not set in stone
 // yet whether accounts should increment the last component or the children of
 // that. We will go with the simpler approach of incrementing the last component.
+// 根据https://github.com/ethereum/EIPs/issues/84的规范，以太坊的根路径为m / 44'/ 60'/ 0'/ 0，尽管它不是一成不变的，
+// 但帐户是否应该增加最后一个组成部分或其子元素。我们将采用最简单的方法来增加最后一个分量
 type DerivationPath []uint32
 
 // ParseDerivationPath converts a user specified derivation path string to the
 // internal binary representation.
-//
+// ParseDerivationPath 将用户指定的派生路径字符串转换为内部二进制表达形式
+
 // Full derivation paths need to start with the `m/` prefix, relative derivation
 // paths (which will get appended to the default root path) must not have prefixes
 // in front of the first element. Whitespace is ignored.
+// 完整的派生路径必须以`m /`前缀开头，相对派生路径（将被附加到默认根路径之后）的第一个元素前不得带有前缀。空格被忽略。
+// 将
 func ParseDerivationPath(path string) (DerivationPath, error) {
 	var result DerivationPath
 
-	// Handle absolute or relative paths
-	components := strings.Split(path, "/")
+	// Handle absolute or relative paths 处理路径（绝对/相对）
+	components := strings.Split(path, "/") // 以“/”为标识进行分割
 	switch {
-	case len(components) == 0:
+	case len(components) == 0: //如果长度为0  返回异常， empty derivation path
 		return nil, errors.New("empty derivation path")
 
-	case strings.TrimSpace(components[0]) == "":
+	case strings.TrimSpace(components[0]) == "": //如果第一个元素去空 为"" 则返回异常：ambiguous path: use 'm/' prefix for absolute paths, or no leading '/' for relative ones
 		return nil, errors.New("ambiguous path: use 'm/' prefix for absolute paths, or no leading '/' for relative ones")
 
-	case strings.TrimSpace(components[0]) == "m":
+	case strings.TrimSpace(components[0]) == "m": //如果第一个元素去空 为"m", 则数组重新复制，从下标为1开始copy。
 		components = components[1:]
 
-	default:
+	default: //默认追加，将DefaultRootDerivationPath  追加到result上
 		result = append(result, DefaultRootDerivationPath...)
 	}
-	// All remaining components are relative, append one by one
-	if len(components) == 0 {
+	// All remaining components are relative, append one by one 其余所有组件都是相对的，一个接一个地添加
+	if len(components) == 0 { //如果数组长度为0  返回异常empty derivation path
 		return nil, errors.New("empty derivation path") // Empty relative paths
 	}
-	for _, component := range components {
+	for _, component := range components { //进行遍历
 		// Ignore any user added whitespace
-		component = strings.TrimSpace(component)
+		// 忽略任何用户添加的空格
+		component = strings.TrimSpace(component) //去空，即上述说的 忽略任何用户添加的空格
 		var value uint32
 
 		// Handle hardened paths
-		if strings.HasSuffix(component, "'") {
-			value = 0x80000000
-			component = strings.TrimSpace(strings.TrimSuffix(component, "'"))
+		// 处理硬化的路径
+		if strings.HasSuffix(component, "'") { //判断元素是否含有'
+			value = 0x80000000                                                //如果是 value = 0x80000000
+			component = strings.TrimSpace(strings.TrimSuffix(component, "'")) //去掉 '
 		}
 		// Handle the non hardened component
+		// 处理未硬化的组件
 		bigval, ok := new(big.Int).SetString(component, 0)
-		if !ok {
+		if !ok { //如果component 不是数字 则会抛出异常
 			return nil, fmt.Errorf("invalid component: %s", component)
 		}
-		max := math.MaxUint32 - value
-		if bigval.Sign() < 0 || bigval.Cmp(big.NewInt(int64(max))) > 0 {
-			if value == 0 {
+		max := math.MaxUint32 - value                                    //4294967295 - value
+		if bigval.Sign() < 0 || bigval.Cmp(big.NewInt(int64(max))) > 0 { //如果bigval是负数，或者 big大于 max（4294967295 - value）
+			if value == 0 { //如果value是0， 返回异常 bigval超过 0 - 4294967295
 				return nil, fmt.Errorf("component %v out of allowed range [0, %d]", bigval, max)
 			}
+			//如果value 不为0，  返回异常： bigval超过 0 - (4294967295-value)
 			return nil, fmt.Errorf("component %v out of allowed hardened range [0, %d]", bigval, max)
 		}
-		value += uint32(bigval.Uint64())
+		value += uint32(bigval.Uint64()) //结果追加
 
-		// Append and repeat
+		fmt.Println(value)
+		// Append and repeat --- 将路径变为数组形式： eg : m/44'/60'/0'/0/0 -- 转为: [44 60 0 0 0]
 		result = append(result, value)
 	}
 	return result, nil
@@ -119,6 +135,8 @@ func ParseDerivationPath(path string) (DerivationPath, error) {
 
 // String implements the stringer interface, converting a binary derivation path
 // to its canonical representation.
+// String 实现了stringer 接口， 将二进制派生路径转换为其规范表示。
+// eg:  [2147483692,2147483708,2147483648,0,0] 转为 m/44'/60'/0'/0/0
 func (path DerivationPath) String() string {
 	result := "m"
 	for _, component := range path {

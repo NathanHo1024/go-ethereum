@@ -22,6 +22,18 @@ import (
 	"testing"
 )
 
+func TestParseDerivationPath(t *testing.T) {
+	//path, err := ParseDerivationPath("m/44'/60'/0'/0/0")
+	//if err != nil{
+	//	fmt.Println(err)
+	//	fmt.Println(path)
+	//}else{
+	//	fmt.Println(path)
+	//	s := path.String()
+	//	fmt.Println(s)
+	//}
+}
+
 // Tests that HD derivation paths can be correctly parsed into our internal binary
 // representation.
 func TestHDPathParsing(t *testing.T) {
