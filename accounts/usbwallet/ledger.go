@@ -38,45 +38,51 @@ import (
 )
 
 // ledgerOpcode is an enumeration encoding the supported Ledger opcodes.
+// ledgerOpcode 是对支持的Ledger操作码进行编码的枚举。
 type ledgerOpcode byte
 
 // ledgerParam1 is an enumeration encoding the supported Ledger parameters for
 // specific opcodes. The same parameter values may be reused between opcodes.
+// ledgerParam1 是对特定操作码支持的Ledger参数进行编码的枚举。相同的参数值可以在操作码之间重用。
 type ledgerParam1 byte
 
 // ledgerParam2 is an enumeration encoding the supported Ledger parameters for
 // specific opcodes. The same parameter values may be reused between opcodes.
+// ledgerParam2 是对特定操作码支持的Ledger参数进行编码的枚举。相同的参数值可以在操作码之间重用。
 type ledgerParam2 byte
 
 const (
-	ledgerOpRetrieveAddress  ledgerOpcode = 0x02 // Returns the public key and Ethereum address for a given BIP 32 path
-	ledgerOpSignTransaction  ledgerOpcode = 0x04 // Signs an Ethereum transaction after having the user validate the parameters
-	ledgerOpGetConfiguration ledgerOpcode = 0x06 // Returns specific wallet application configuration
-	ledgerOpSignTypedMessage ledgerOpcode = 0x0c // Signs an Ethereum message following the EIP 712 specification
+	ledgerOpRetrieveAddress  ledgerOpcode = 0x02 // Returns the public key and Ethereum address for a given BIP 32 path 返回给定BIP 32路径的公钥和以太坊地址
+	ledgerOpSignTransaction  ledgerOpcode = 0x04 // Signs an Ethereum transaction after having the user validate the parameters 让用户验证参数后签署以太坊交易
+	ledgerOpGetConfiguration ledgerOpcode = 0x06 // Returns specific wallet application configuration 返回特定的钱包应用程序配置
+	ledgerOpSignTypedMessage ledgerOpcode = 0x0c // Signs an Ethereum message following the EIP 712 specification 遵循EIP 712规范对以太坊消息进行签名
 
-	ledgerP1DirectlyFetchAddress    ledgerParam1 = 0x00 // Return address directly from the wallet
-	ledgerP1InitTypedMessageData    ledgerParam1 = 0x00 // First chunk of Typed Message data
-	ledgerP1InitTransactionData     ledgerParam1 = 0x00 // First transaction data block for signing
-	ledgerP1ContTransactionData     ledgerParam1 = 0x80 // Subsequent transaction data block for signing
-	ledgerP2DiscardAddressChainCode ledgerParam2 = 0x00 // Do not return the chain code along with the address
+	ledgerP1DirectlyFetchAddress    ledgerParam1 = 0x00 // Return address directly from the wallet 直接从钱包返回地址
+	ledgerP1InitTypedMessageData    ledgerParam1 = 0x00 // First chunk of Typed Message data 第一块输入的消息数据
+	ledgerP1InitTransactionData     ledgerParam1 = 0x00 // First transaction data block for signing 用于签名的第一个交易数据块
+	ledgerP1ContTransactionData     ledgerParam1 = 0x80 // Subsequent transaction data block for signing 后续交易数据块进行签名
+	ledgerP2DiscardAddressChainCode ledgerParam2 = 0x00 // Do not return the chain code along with the address 不要返回链码和地址
 )
 
 // errLedgerReplyInvalidHeader is the error message returned by a Ledger data exchange
 // if the device replies with a mismatching header. This usually means the device
 // is in browser mode.
+// errLedgerReplyInvalidHeader 是Ledger数据交换返回的错误消息，如果设备回复了不匹配的标头。这通常意味着设备处于浏览器模式。
 var errLedgerReplyInvalidHeader = errors.New("ledger: invalid reply header")
 
 // errLedgerInvalidVersionReply is the error message returned by a Ledger version retrieval
 // when a response does arrive, but it does not contain the expected data.
+// errLedgerInvalidVersionReply 是响应到达时Ledger版本检索返回的错误消息，但其中不包含预期的数据。
 var errLedgerInvalidVersionReply = errors.New("ledger: invalid version reply")
 
 // ledgerDriver implements the communication with a Ledger hardware wallet.
+// ledgerDriver 与Ledger硬件钱包实现通信。
 type ledgerDriver struct {
-	device  io.ReadWriter // USB device connection to communicate through
-	version [3]byte       // Current version of the Ledger firmware (zero if app is offline)
-	browser bool          // Flag whether the Ledger is in browser mode (reply channel mismatch)
-	failure error         // Any failure that would make the device unusable
-	log     log.Logger    // Contextual logger to tag the ledger with its id
+	device  io.ReadWriter // USB device connection to communicate through USB设备连接以通过进行通信
+	version [3]byte       // Current version of the Ledger firmware (zero if app is offline) Ledger固件的当前版本（如果应用程序离线则为零）
+	browser bool          // Flag whether the Ledger is in browser mode (reply channel mismatch) 标记分类帐是否处于浏览器模式（回复频道不匹配）
+	failure error         // Any failure that would make the device unusable 任何会导致设备无法使用的故障
+	log     log.Logger    // Contextual logger to tag the ledger with its id 内容相关的记录器，以ID标记分类帐
 }
 
 // newLedgerDriver creates a new instance of a Ledger USB protocol driver.

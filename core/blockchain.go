@@ -145,13 +145,14 @@ var defaultCacheConfig = &CacheConfig{
 
 // BlockChain represents the canonical chain given a database with a genesis
 // block. The Blockchain manages chain imports, reverts, chain reorganisations.
-//
+// BlockChain 表示了一个规范的链,这个链通过一个包含了创世区块的数据库指定. BlockChain管理了链的插入,还原,重建等操作.
 // Importing blocks in to the block chain happens according to the set of rules
 // defined by the two stage Validator. Processing of blocks is done using the
 // Processor which processes the included transaction. The validation of the state
 // is done in the second part of the Validator. Failing results in aborting of
 // the import.
-//
+// 插入一个区块需要通过一系列指定的规则指定的两阶段的验证器.
+// 使用Processor来对区块的交易进行处理. 状态的验证是第二阶段的验证器. 错误将导致插入终止.
 // The BlockChain also helps in returning blocks from **any** chain included
 // in the database as well as blocks that represents the canonical chain. It's
 // important to note that GetBlock can return any block and does not need to be

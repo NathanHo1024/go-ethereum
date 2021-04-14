@@ -106,6 +106,8 @@ func (v *BlockValidator) ValidateState(block *types.Block, statedb *state.StateD
 // to keep the baseline gas above the provided floor, and increase it towards the
 // ceil if the blocks are full. If the ceil is exceeded, it will always decrease
 // the gas allowance.
+// CalcGasLimit 计算父级之后的下一个区块的气体限制。
+// 它的目的是将基准气体保持在所提供的地板上方，如果块已满，则将其增加到天花板。如果超过上限，它将始终减少气体余量。
 func CalcGasLimit(parent *types.Block, gasFloor, gasCeil uint64) uint64 {
 	// contrib = (parentGasUsed * 3 / 2) / 1024
 	contrib := (parent.GasUsed() + parent.GasUsed()/2) / params.GasLimitBoundDivisor

@@ -36,22 +36,24 @@ import (
 // Minimum amount of time between cache reloads. This limit applies if the platform does
 // not support change notifications. It also applies if the keystore directory does not
 // exist yet, the code will attempt to create a watcher at most this often.
+// 两次高速缓存重新加载之间的最短时间。如果平台不支持更改通知，则适用此限制。如果密钥库目录尚不存在，它也适用，代码最多会尝试创建观察者一次。
 const minReloadInterval = 2 * time.Second
 
 type accountsByURL []accounts.Account
 
-func (s accountsByURL) Len() int           { return len(s) }
+func (s accountsByURL) Len() int           { return len(s) } //返回当前accountsByURL的长度
 func (s accountsByURL) Less(i, j int) bool { return s[i].URL.Cmp(s[j].URL) < 0 }
-func (s accountsByURL) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s accountsByURL) Swap(i, j int)      { s[i], s[j] = s[j], s[i] } //换位排序
 
 // AmbiguousAddrError is returned when attempting to unlock
 // an address for which more than one file exists.
+// AmbiguousAddrError 尝试解锁存在多个文件的地址时返回。
 type AmbiguousAddrError struct {
 	Addr    common.Address
 	Matches []accounts.Account
 }
 
-func (err *AmbiguousAddrError) Error() string {
+func (err *AmbiguousAddrError) Error() string { //返回错误
 	files := ""
 	for i, a := range err.Matches {
 		files += a.URL.Path
@@ -63,15 +65,16 @@ func (err *AmbiguousAddrError) Error() string {
 }
 
 // accountCache is a live index of all accounts in the keystore.
+// accountCache 是密钥库中所有帐户的实时索引。
 type accountCache struct {
-	keydir   string
+	keydir   string //目录
 	watcher  *watcher
-	mu       sync.Mutex
-	all      accountsByURL
-	byAddr   map[common.Address][]accounts.Account
+	mu       sync.Mutex                            //同步锁
+	all      accountsByURL                         //地址数组
+	byAddr   map[common.Address][]accounts.Account //通过Address 获取Account  集合
 	throttle *time.Timer
-	notify   chan struct{}
-	fileC    fileCache
+	notify   chan struct{} //channel 通知
+	fileC    fileCache     //在密钥库扫描期间看到的文件缓存。
 }
 
 func newAccountCache(keydir string) (*accountCache, chan struct{}) {

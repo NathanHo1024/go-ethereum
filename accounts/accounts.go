@@ -84,7 +84,7 @@ type Wallet interface {
 	Accounts() []Account
 
 	// Contains returns whether an account is part of this particular wallet or not.
-	// Contains 返回一个账号是否属于本钱包。
+	// Contains 返回一个地址是否属于本钱包。
 	Contains(account Account) bool
 
 	// Derive attempts to explicitly derive a hierarchical deterministic account at
@@ -248,6 +248,6 @@ const (
 // departure is detected.
 // WalletEvent 是检测到钱包到达或离开时由帐户后端触发的事件。
 type WalletEvent struct {
-	Wallet Wallet          // Wallet instance arrived or departed
-	Kind   WalletEventType // Event type that happened in the system
+	Wallet Wallet          // Wallet instance arrived or departed Wallet的进出
+	Kind   WalletEventType // Event type that happened in the system 系统中发生的事件类型
 }

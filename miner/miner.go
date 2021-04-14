@@ -55,11 +55,11 @@ type Config struct {
 
 // Miner creates blocks and searches for proof-of-work values.
 type Miner struct {
-	mux      *event.TypeMux
-	worker   *worker
-	coinbase common.Address
-	eth      Backend
-	engine   consensus.Engine
+	mux      *event.TypeMux   //事件锁， 已经被feed.mu.lock 替代 事件锁，事件发生时，会有一个TypeMux将时间分派给注册的接收者。接收者可以注册以处理特定类型的事件。在mux结束后调用的任何操作将返回ErrMuxClosed。
+	worker   *worker          //矿工
+	coinbase common.Address   //节点矿工地址
+	eth      Backend          //  Backend对象，Backend是一个自定义接口封装了所有挖矿所需方法。
+	engine   consensus.Engine //共识引擎，获得共识算法的工具对象，以提供后续共识相关操作使用。
 	exitCh   chan struct{}
 	startCh  chan common.Address
 	stopCh   chan struct{}

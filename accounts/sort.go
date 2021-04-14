@@ -17,6 +17,7 @@
 package accounts
 
 // AccountsByURL implements sort.Interface for []Account based on the URL field.
+// AccountsByURL  account数组实现排序接口以url元素为基础
 type AccountsByURL []Account
 
 func (a AccountsByURL) Len() int           { return len(a) }

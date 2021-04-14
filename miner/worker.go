@@ -122,20 +122,21 @@ type intervalAdjust struct {
 
 // worker is the main object which takes care of submitting new work to consensus engine
 // and gathering the sealing result.
+// worker 是将新工作提交共识引擎并收集密封结果的主要目的。
 type worker struct {
-	config      *Config
-	chainConfig *params.ChainConfig
-	engine      consensus.Engine
-	eth         Backend
-	chain       *core.BlockChain
+	config      *Config             //miner下的config
+	chainConfig *params.ChainConfig //ChainConfig配置内容
+	engine      consensus.Engine    //共识算法
+	eth         Backend             //后端
+	chain       *core.BlockChain    //区块的信息
 
 	// Feeds
-	pendingLogsFeed event.Feed
+	pendingLogsFeed event.Feed //事件推送
 
 	// Subscriptions
-	mux          *event.TypeMux
-	txsCh        chan core.NewTxsEvent
-	txsSub       event.Subscription
+	mux          *event.TypeMux        //事件锁
+	txsCh        chan core.NewTxsEvent //交易hash事件channel频道
+	txsSub       event.Subscription    //交易hash事件订阅
 	chainHeadCh  chan core.ChainHeadEvent
 	chainHeadSub event.Subscription
 	chainSideCh  chan core.ChainSideEvent

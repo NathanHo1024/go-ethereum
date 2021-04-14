@@ -67,21 +67,32 @@ func (n *BlockNonce) UnmarshalText(input []byte) error {
 
 // Header represents a block header in the Ethereum blockchain.
 type Header struct {
-	ParentHash  common.Hash    `json:"parentHash"       gencodec:"required"`
-	UncleHash   common.Hash    `json:"sha3Uncles"       gencodec:"required"`
-	Coinbase    common.Address `json:"miner"            gencodec:"required"`
-	Root        common.Hash    `json:"stateRoot"        gencodec:"required"`
-	TxHash      common.Hash    `json:"transactionsRoot" gencodec:"required"`
-	ReceiptHash common.Hash    `json:"receiptsRoot"     gencodec:"required"`
-	Bloom       Bloom          `json:"logsBloom"        gencodec:"required"`
-	Difficulty  *big.Int       `json:"difficulty"       gencodec:"required"`
-	Number      *big.Int       `json:"number"           gencodec:"required"`
-	GasLimit    uint64         `json:"gasLimit"         gencodec:"required"`
-	GasUsed     uint64         `json:"gasUsed"          gencodec:"required"`
-	Time        uint64         `json:"timestamp"        gencodec:"required"`
-	Extra       []byte         `json:"extraData"        gencodec:"required"`
-	MixDigest   common.Hash    `json:"mixHash"`
-	Nonce       BlockNonce     `json:"nonce"`
+	//结构信息
+	ParentHash common.Hash `json:"parentHash"       gencodec:"required"` //前一个区块hash
+	UncleHash  common.Hash `json:"sha3Uncles"       gencodec:"required"` //指向叔块hash
+	Number     *big.Int    `json:"number"           gencodec:"required"` //当前区块高度， 子区块高度一定是父区块+1
+
+	//挖矿基础信息
+	Coinbase common.Address `json:"miner"            gencodec:"required"` //矿工收益地址： 收益包括：  挖矿奖励+ 手续费奖励
+	GasLimit uint64         `json:"gasLimit"         gencodec:"required"` //交易总limit -- 矿工执行交易的上限gas用量,如果执行某个交易时发现gas使用超过这个值则放弃执行后续交易。其数值是基于父区块gas用量来调整,如果parentGasUsed > parentGasLimit * (2/3),则增大该数值，反之则减小
+	GasUsed  uint64         `json:"gasUsed"          gencodec:"required"` //交易用的gas--实际使用的gas,每执行一笔交易往该字段上累积gas值
+
+	//状态信息
+	Time        uint64      `json:"timestamp"        gencodec:"required"` //新区块的出块时间(按代码描述,严格来说其实是开始挖矿的时间)。
+	Root        common.Hash `json:"stateRoot"        gencodec:"required"` //stateRoot指的是状态树根节点的Hash值--状态树 状态树是保存的所有账户（发生过交易的账户）的树 -- 代表的区块链当前所有账户的状态,
+	TxHash      common.Hash `json:"transactionsRoot" gencodec:"required"` //交易hash--交易树 -- 本区块所有交易摘要,
+	ReceiptHash common.Hash `json:"receiptsRoot"     gencodec:"required"` // 在以太坊中最重要的功能是加入了智能合约，而智能合约的执行过程比较复杂，收据树的作用是利于系统快速查询执行结果。用于接收者检查block中transactions的完整性。--收据树--本区块所有收据的摘要。
+	Bloom       Bloom       `json:"logsBloom"        gencodec:"required"` //可以非常高效的查询某个元素是否在集合中。
+
+	//挖矿难度控制
+	Difficulty *big.Int `json:"difficulty"       gencodec:"required"` //挖矿难度
+
+	//其他
+	Extra []byte `json:"extraData"        gencodec:"required"` //矿工可以在区块中包含的任何数据
+
+	//PoW参数
+	MixDigest common.Hash `json:"mixHash"` //混合哈希，与 nonce 结合使用
+	Nonce     BlockNonce  `json:"nonce"`   //加密学中的概念
 }
 
 // field type overrides for gencodec
@@ -148,22 +159,22 @@ type Body struct {
 
 // Block represents an entire block in the Ethereum blockchain.
 type Block struct {
-	header       *Header
-	uncles       []*Header
-	transactions Transactions
+	header       *Header      //header 指向 Header 结构（之后会详细说明），header 存储一个区块的基本信息。
+	uncles       []*Header    //指向header结构
+	transactions Transactions //一组transaction结构
 
 	// caches
-	hash atomic.Value
-	size atomic.Value
+	hash atomic.Value //当前区块的hash值
+	size atomic.Value //当前区块的大小
 
 	// Td is used by package core to store the total difficulty
 	// of the chain up to and including the block.
-	td *big.Int
+	td *big.Int //当前区块难度值
 
 	// These fields are used by package eth to track
 	// inter-peer block relay.
-	ReceivedAt   time.Time
-	ReceivedFrom interface{}
+	ReceivedAt   time.Time   //接收时间
+	ReceivedFrom interface{} //来源
 }
 
 // DeprecatedTd is an old relic for extracting the TD of a block. It is in the

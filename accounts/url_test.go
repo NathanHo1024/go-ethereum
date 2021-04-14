@@ -17,6 +17,7 @@
 package accounts
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -35,6 +36,8 @@ func TestURLParsing(t *testing.T) {
 	_, err = parseURL("ethereum.org")
 	if err == nil {
 		t.Error("expected err, got: nil")
+	} else {
+		fmt.Println(err)
 	}
 }
 

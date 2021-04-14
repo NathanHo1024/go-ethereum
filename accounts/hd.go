@@ -35,7 +35,7 @@ var DefaultRootDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000 + 60,
 // DefaultBaseDerivationPath is the base path from which custom derivation endpoints
 // are incremented. As such, the first account will be at m/44'/60'/0'/0/0, the second
 // at m/44'/60'/0'/0/1, etc.
-// DefaultBaseDerivationPath 是自定义派生终结点从其递增的基本路径。
+// DefaultBaseDerivationPath 是自定义派生终结点从其递增的基本路径。-- 最后一个组件自增
 // 这样，第一个帐户将为m / 44'/ 60'/ 0'/ 0/0，第二个帐户将为m / 44'/ 60'/ 0'/ 0/1，依此类推。
 var DefaultBaseDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0}
 
@@ -154,11 +154,13 @@ func (path DerivationPath) String() string {
 }
 
 // MarshalJSON turns a derivation path into its json-serialized string
+// MarshalJSON 将派生路径转换为其json序列化的字符串
 func (path DerivationPath) MarshalJSON() ([]byte, error) {
 	return json.Marshal(path.String())
 }
 
 // UnmarshalJSON a json-serialized string back into a derivation path
+// UnmarshalJSON json序列化的字符串返回到派生路径
 func (path *DerivationPath) UnmarshalJSON(b []byte) error {
 	var dp string
 	var err error
@@ -171,6 +173,7 @@ func (path *DerivationPath) UnmarshalJSON(b []byte) error {
 
 // DefaultIterator creates a BIP-32 path iterator, which progresses by increasing the last component:
 // i.e. m/44'/60'/0'/0/0, m/44'/60'/0'/0/1, m/44'/60'/0'/0/2, ... m/44'/60'/0'/0/N.
+// DefaultIterator 创建一个BIP-32路径的迭代器 该迭代器通过增加最后一个组件来进行
 func DefaultIterator(base DerivationPath) func() DerivationPath {
 	path := make(DerivationPath, len(base))
 	copy(path[:], base[:])
@@ -185,6 +188,9 @@ func DefaultIterator(base DerivationPath) func() DerivationPath {
 // LedgerLiveIterator creates a bip44 path iterator for Ledger Live.
 // Ledger Live increments the third component rather than the fifth component
 // i.e. m/44'/60'/0'/0/0, m/44'/60'/1'/0/0, m/44'/60'/2'/0/0, ... m/44'/60'/N'/0/0.
+// LedgerLiveIterator 为Ledger live创建一个bip44路径的迭代器，
+// Ledger Live 增加第三部分（用户下标）而不是第五部分
+// eg： m/44'/60'/0'/0/0, m/44'/60'/1'/0/0
 func LedgerLiveIterator(base DerivationPath) func() DerivationPath {
 	path := make(DerivationPath, len(base))
 	copy(path[:], base[:])
